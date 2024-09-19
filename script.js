@@ -8,7 +8,7 @@ const closeModalBtn = document.getElementById("close-modal-btn")
 const cartCounter = document.getElementById("cart-count")
 const addressInput = document.getElementById("address")
 const addressWarn = document.getElementById("address-warn")
-
+const notification = document.getElementById("notification")
 
 let cart = [];
 
@@ -31,7 +31,6 @@ closeModalBtn.addEventListener("click", function(){
 
 
 menu.addEventListener("click", function(event){
-  // console.log(event.target)
   let parentButton = event.target.closest(".add-to-cart-btn")
 
   if(parentButton){
@@ -39,32 +38,35 @@ menu.addEventListener("click", function(event){
     const price = parseFloat(parentButton.getAttribute("data-price"))
     addToCart(name, price)
   }
-
 })
 
+// Função para exibir a notificação
+function showNotification() {
+  notification.classList.remove('hidden');
+  notification.classList.add('opacity-100');
+
+  setTimeout(() => {
+    notification.classList.add('hidden');
+  }, 3000);
+}
 
 // Função para adicionar no carrinho
 function addToCart(name, price){
   const existingItem = cart.find(item => item.name === name)
 
   if(existingItem){
-   //Se o item já existe, aumenta apenas a quantidade + 1 
-   existingItem.quantity += 1;
-
-  }else{
-
+    existingItem.quantity += 1;
+  } else {
     cart.push({
       name,
       price,
       quantity: 1,
     })
-
   }
 
-  updateCartModal()
-
+  updateCartModal();
+  showNotification();  // Exibe a notificação
 }
-
 
 //Atualiza o carrinho
 function updateCartModal(){
@@ -83,18 +85,14 @@ function updateCartModal(){
           <p class="font-medium mt-2">R$ ${item.price.toFixed(3)}</p>
         </div>
 
-
         <button class="remove-from-cart-btn" data-name="${item.name}">
           Remover
         </button>
-
       </div>
     `
 
     total += item.price * item.quantity;
-
     cartItemsContainer.appendChild(cartItemElement)
-
   })
 
   cartTotal.textContent = total.toFixed(3).toLocaleString("pt-BR", {
@@ -103,18 +101,14 @@ function updateCartModal(){
   });
 
   cartCounter.innerHTML = cart.length;
-
 }
-
 
 // Função para remover o item do carrinho
 cartItemsContainer.addEventListener("click", function (event){
   if(event.target.classList.contains("remove-from-cart-btn")){
     const name = event.target.getAttribute("data-name")
-
     removeItemCart(name);
   }
-
 })
 
 function removeItemCart(name){
@@ -131,11 +125,8 @@ function removeItemCart(name){
 
     cart.splice(index, 1);
     updateCartModal();
-
   }
-
 }
-
 
 addressInput.addEventListener("input", function(event){
   let inputValue = event.target.value;
@@ -144,24 +135,19 @@ addressInput.addEventListener("input", function(event){
     addressInput.classList.remove("border-red-500")
     addressWarn.classList.add("hidden")
   }
-
-
 })
-
 
 // Finalizar pedido
 checkoutBtn.addEventListener("click", function(){
-
   const isOpen = checkRestaurantOpen();
   if(!isOpen){
-
     Toastify({
       text: "Ops a loja está fechada!",
       duration: 3000,
       close: true,
-      gravity: "top", // `top` or `bottom`
-      position: "right", // `left`, `center` or `right`
-      stopOnFocus: true, // Prevents dismissing of toast on hover
+      gravity: "top",
+      position: "right",
+      stopOnFocus: true,
       style: {
         background: "#ef4444",
       },
@@ -177,7 +163,6 @@ checkoutBtn.addEventListener("click", function(){
     return;
   }
 
-  //Enviar o pedido para api whats
   const cartItems = cart.map((item) => {
     return (
       ` ${item.name} Quantidade: (${item.quantity}) Preço: R$${item.price.toFixed(3)} |`
@@ -191,18 +176,14 @@ checkoutBtn.addEventListener("click", function(){
 
   cart = [];
   updateCartModal();
-
 })
-
 
 // Verificar a hora e manipular o card horario
 function checkRestaurantOpen(){
   const data = new Date();
   const hora = data.getHours();
-  return hora >= 9 && hora < 18; 
-  //true = restaurante está aberto 
+  return hora >= 9 && hora < 18;
 }
-
 
 const spanItem = document.getElementById("date-span")
 const isOpen = checkRestaurantOpen();
